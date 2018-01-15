@@ -1,0 +1,22 @@
+<div id="login" [style.min-height.px]="container_min_height">
+
+    <img class="himg" src="../../../../media/images/smitd_logo_text.png"><br>
+
+    <h1>Login</h1>
+
+    <form [formGroup]="loginForm" novalidate>
+        <input type="text" class="form-control" formControlName="username" placeholder="Username" ><br>
+        <input type="password" class="form-control" formControlName="password" placeholder="Password" ><br>
+        <button type="button" class="btn btn-default" (click)="submit()" [disabled]="!loginForm.valid">Login</button>
+    </form>
+    <div class="error" *ngIf=" err !== '' "> Invalid username or password </div>
+
+    <div class="separator">
+        <div></div><p >or</p><div></div>
+    </div>
+    <a routerLink="/register">Create a free SMITD Account</a>
+    <br>
+    <!-- <br><a href="">Can't log in?</a> -->
+    <br>
+
+</div>

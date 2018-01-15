@@ -1,0 +1,465 @@
+:host{
+    background-image: url("../../../media/backgrounds/smitd_bg_crystals.png");
+    background-repeat: repeat;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+}
+#modules{
+  // background-color: rgba(0,0,0,0.5);
+  background: linear-gradient(-90deg, rgba(0,0,0,0),rgba(0,0,0,0.5),rgba(0,0,0,0.65),rgba(0,0,0,0.65),rgba(0,0,0,0.65),rgba(0,0,0,0.65),rgba(0,0,0,0.5),rgba(0,0,0,0.0));
+  width: 100%;
+}
+
+@media (min-width: 720px) { #modules{ width: 640px; } }
+@media (min-width: 1000px) { #modules{ width: 920px; } }
+@media (min-width: 1200px) { #modules{ width: 1140px; } }
+
+.sortandfilter{
+  width: 100%;
+  background: #000;
+  margin: 0;
+  padding: 10px 0 0 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.text-input{
+  font-family: CGB;
+  font-size: 120%;
+  color: #FFF;
+  width: 90%;
+  height: 30px;
+  border-radius: 5px;
+  text-align: center;
+  background-color: rgb(50,50,50);
+  border: 5px solid rgba(50,50,50,1);
+  margin: 10px 5% 5px 5%;
+
+  &:focus{
+      background-color: rgb(30,30,30);
+      outline: none;
+    }
+}
+
+.checkers{
+  width: 90%;
+  display: flex;
+  justify-content: center;
+
+}
+
+.checker{
+  font-family: CGR;
+  color: #FFF;
+  margin-left: 50%;
+  transform: translate(-50%);
+  width: 100px;
+  text-align: center;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 5px -40px 5px 70px;
+}
+
+.checker p{
+  font-family: CGB;
+  margin: 5px;;
+}
+
+.checkbox input[type=checkbox] {
+  opacity: 0;
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  left: -4px;
+  top: -5px;
+  z-index: 800;
+  cursor: pointer;
+}
+.checkbox {
+	width: 80px;
+	height: 40px;
+	background:  rgb(50,50,50);
+
+	border-radius: 50px;
+	position: relative;
+}
+.checkbox:before {
+  font-family: CGB;
+	content: '✔';
+	position: absolute;
+
+	top: 5px;
+	left: 5px;
+  height: 30px;
+  width: 30px;
+  border-radius: 100%;
+
+	color: #0F0;
+	font-size: 25px;
+  line-height: 30px;
+  background-color: #222;
+}
+.checkbox:after {
+  font-family: CGB;
+	content: '✖';
+	position: absolute;
+
+	top: 5px;
+	left: 45px;
+  height: 30px;
+  width: 30px;
+  border-radius: 100%;
+
+	color: #F00;
+	font-size: 25px;
+  line-height: 30px;
+  background-color: #222;
+}
+.checkbox label {
+	display: block;
+	width: 30px;
+	height: 30px;
+	border-radius: 50px;
+
+	transition: all .5s ease;
+	cursor: pointer;
+	position: absolute;
+	top: 5px;
+	z-index: 1;
+	left: 5px;
+	background: rgba(255,0,0,1);
+}
+.checkbox input[type=checkbox]:checked + label {
+	left: 45px;
+	background:rgba(0,255,0,1);
+}
+.checkbox input[type=checkbox]:disabled + label {
+	left: 5px;
+	width: 70px;
+	background:rgba(30,30,30,1);
+}
+
+.list{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.module-tab{
+  position: relative;
+  width: 200px;
+  height: 390px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  border-radius: 100px;
+  background:  linear-gradient(rgba(20,20,20,0.5),rgba(0,0,0,0.5),rgba(0,0,0,0.5),rgba(20,20,20,0.75));
+  padding-bottom: 10px;
+  margin: 40px;
+  box-shadow: 0 0 10px 5px rgba(0,0,0,1);
+}
+.module-img{
+  height: 200px;
+  width: 200px;
+  background-image: #000;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border-radius: 50%;
+}
+.module-img-shadow{
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 200px;
+  width: 200px;
+  // border-top-left-radius: 50%;
+  // border-top-right-radius: 50%;
+  border-radius: 50%;
+
+  box-shadow: inset 0 0 20px 2px #000;
+}
+.module-title{
+  font-size: 125%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow:ellipsis;
+  width: 100%;
+  margin: 10px 0;
+}
+.module-type{
+  color: rgba(100,100,100, 1);
+  width: 100%;
+  margin: 0;
+}
+.stars{
+  position: relative;
+  overflow: hidden;
+  height: 40px;
+  width: 200px;
+  display: block;
+  padding: 0 5px 10px 5px;
+}
+.star{
+  width: 40px;
+  height: 40px;
+  color: #FC0;
+  font-size: 40px;
+  line-height: 40px;
+  margin: 0;
+  padding: 0;
+  text-shadow: 0 0 5px #EB0;
+  &-empty{
+    width: 40px;
+    height: 40px;
+    color: rgba(100,100,100, 1);
+    font-size: 40px;
+    line-height: 40px;
+    margin: 0;
+    padding: 0;
+    text-shadow: 0 0 10px #000;
+  }
+  &-half{
+    overflow: hidden;
+    width: 16.75px;
+    height: 40px;
+    color: #FC0;
+    font-size: 40px;
+    line-height: 40px;
+    margin: 0;
+    margin-left: 3px;
+    margin-right: 20.25px;
+    padding: 0;
+    text-shadow: 0 0 5px #EB0;
+  }
+}
+
+.s{
+  &1{
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  &2{
+    position: absolute;
+    left: 40px;
+    top: 0;
+  }
+  &3{
+    position: absolute;
+    left: 80px;
+    top: 0;
+  }
+  &4{
+    position: absolute;
+    left: 120px;
+    top: 0;
+  }
+  &5{
+    position: absolute;
+    left: 160px;
+    top: 0;
+  }
+}
+
+
+.icons{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.icon{
+  overflow: hidden;
+  font-family: CGB;
+  background-color:  rgb(50,50,50);
+  color: rgba(20,20,20, 1);
+  text-shadow: 0 0 5px rgba(10,10,10, 1);
+  height: 60px;
+  width: 60px;
+  line-height: 60px;
+  font-size: 50px;
+  border-radius: 50%;
+  outline: none;
+  margin: 0 5px 10px 5px;
+  cursor: pointer;
+
+  box-shadow: 0 0 10px 3px rgba(0,0,0,1);
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+  &:hover{
+  }
+}
+
+.small{
+  margin-top: -5px;
+  height: 40px;
+  width: 40px;
+  line-height: 40px;
+  font-size: 20px;
+}
+.play p{
+  font-family: ICON;
+  font-size: 80%;
+  margin: 0;
+  padding: 0;
+  margin-left: 4px;
+  margin-top: 2px;
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+  &:hover{
+    color: #0F0;
+    text-shadow: 0 0 10px #0F0;
+  }
+}
+.test p{
+  font-family: ICON;
+  font-size: 80%;
+  margin: 0;
+  padding: 0;
+  margin-left: 4px;
+  margin-top: 2px;
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+  &:hover{
+    color: #FA0;
+    text-shadow: 0 0 10px #FA0;
+  }
+}
+.edit{
+  position: relative;
+}
+.edit .wrench{
+  position: absolute;
+  font-family: ICON;
+  font-size: 80%;
+  top: -42px;
+  left: 12px;
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+}
+.edit:hover p{
+  color: #FA0;
+  text-shadow: 0 0 10px #FA0;
+}
+.wait p{
+  font-family: ICON;
+  cursor: default;
+  font-size: 100%;
+  margin: 0;
+  margin-top:  0px;
+  text-shadow: none;
+
+
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+  // &:hover{
+  //   color: #FA0;
+  //   text-shadow: 0 0 10px #FA0;
+  // }
+}
+.add p{
+  font-family: ICON;
+  font-size:80%;
+  margin: 0;
+  margin-top:  2px;
+  margin-left: 0.5px;
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+  &:hover{
+    color: #FA0;
+    text-shadow: 0 0 10px #FA0;
+  }
+}
+.remove p{
+  font-family: ICON;
+  font-size: 45px;
+  margin: 0;
+  margin-top:  -1px;
+  margin-left: 1px;
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+  &:hover{
+    color: #A00;
+    text-shadow: 0 0 10px #A00;
+  }
+}
+.accept p{
+  font-family: ICON;
+  font-size: 30px;
+  margin: 0;
+  padding: 0;
+  margin-left: 1px;
+  margin-top: 0px;
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+  &:hover{
+    color: #0F0;
+    text-shadow: 0 0 10px #0F0;
+  }
+}
+.deny p{
+  font-family: ICON;
+  font-size: 30px;
+  margin: 0;
+  margin-top: 0;
+  margin-left: 1px;
+
+  transition: color 0.5s, text-shadow 0.5s;
+
+  &:hover{
+    color: #A00;
+    text-shadow: 0 0 10px #A00;
+  }
+}
+
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+.rotating {
+  -webkit-animation: rotating 3s linear infinite;
+  -moz-animation: rotating 3s linear infinite;
+  -ms-animation: rotating 3s linear infinite;
+  -o-animation: rotating 3s linear infinite;
+  animation: rotating 3s linear infinite;
+}

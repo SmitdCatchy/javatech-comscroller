@@ -1,0 +1,15 @@
+:host{
+    background-image: url("../../../media/backgrounds/smitd_bg_crystals.png");
+    background-repeat: repeat;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+}
+#account{
+  background-color: rgba(0,0,0,0.5);
+  width: 100%;
+}
+
+@media (min-width: 720px) { #account{ width: 640px; } }
+@media (min-width: 1000px) { #account{ width: 920px; } }
+@media (min-width: 1200px) { #account{ width: 1140px; } }

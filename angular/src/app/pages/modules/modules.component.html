@@ -1,0 +1,147 @@
+<div id="modules" [style.min-height.px]="container_min_height">
+  <div class="sortandfilter" *ngIf="userService.user.role != 'GUEST'">
+    <div class="icon add" (click)="iconAdd()" >
+      <p>&#xf067;</p>
+    </div>
+  </div>
+
+  <div class="list">
+
+    <div *ngFor="let module of modules">
+
+      <div class="module-tab" *ngIf="
+        module.owner === userService.user.id ||
+        (
+          userService.user.role == 'GUEST' &&
+          module.isPublic === 1 &&
+          module.approved === 1
+        ) ||(
+          userService.user.role == 'USER' &&
+          module.approved === 1
+        ) ||
+        userService.user.role == 'MODERATOR' ||
+        userService.user.role == 'ADMIN'"
+      >
+
+        <div class="module-img"
+          [ngStyle]="{'background-image':'url(' + module.imageToLoad + ')'}"
+        ></div>
+        <div class="module-img-shadow"></div>
+        <h2 class="module-title" title="{{module.name}}">{{module.name}}</h2>
+        <h3 class="module-type">{{module.type}}</h3>
+        <div class="stars">
+          <div class="star-empty s1">☆</div>
+          <div class="star-empty s2">☆</div>
+          <div class="star-empty s3">☆</div>
+          <div class="star-empty s4">☆</div>
+          <div class="star-empty s5">☆</div>
+          <div *ngIf="module.rate >= 1" class="star s1">★</div>
+          <div *ngIf="module.rate >= 1.5 &&
+            module.rate < 2" class="star-half s2">★</div>
+          <div *ngIf="module.rate >= 2" class="star s2">★</div>
+          <div *ngIf="module.rate >= 2.5 &&
+            module.rate < 3" class="star-half s3">★</div>
+          <div *ngIf="module.rate >= 3" class="star s3">★</div>
+          <div *ngIf="module.rate >= 3.5 &&
+            module.rate < 4" class="star-half s4">★</div>
+          <div *ngIf="module.rate >= 4" class="star s4">★</div>
+          <div *ngIf="module.rate >= 4.5 &&
+            module.rate < 5" class="star-half s5">★</div>
+          <div *ngIf="module.rate >= 5" class="star s5">★</div>
+        </div>
+        <!-- <div class="module-description"><p>{{module.description}}</p></div> -->
+
+        <div class="icons">
+          <div class="icon play" *ngIf="
+            (
+              userService.user.role == 'GUEST'&&
+              module.finished === 1 &&
+              module.isPublic === 1
+            ) ||
+            (
+              userService.user.role != 'GUEST' &&
+              module.finished === 1 &&
+              module.approved === 1
+            )"
+            (click)="iconPlay(module.id, module.type, module.name)"
+            >
+            <p>&#xf054;</p>
+          </div>
+          <div class="icon edit" *ngIf="
+            (module.owner === userService.user.id  &&
+            module.finished === 0)"
+            (click)="iconEdit(module.id, module.name)">
+            <p class="hammer" >&#xf0e3;</p>
+            <p class="wrench" >&#xf0ad;</p>
+          </div>
+          <div class="icon remove" *ngIf="
+            ((userService.user.role == 'ADMIN' ||
+            userService.user.role == 'MODERATOR') &&
+            module.finished === 1 &&
+            module.approved === 1)
+            ||
+            (userService.user.id == module.owner &&
+            userService.user.id == 'USER' &&
+            module.finished === 1 &&
+            module.approved === 1)"
+            (click)="iconDisapprove(module.id)">
+            <p>&#xf00d;</p>
+          </div>
+          <div class="icon wait" *ngIf="
+            (userService.user.id == module.owner &&
+            userService.user.role == 'USER' &&
+            module.finished === 1 &&
+            module.approved === 0)">
+            <p class="rotating">&#xf013;</p>
+          </div>
+          <div class="icon accept small" *ngIf="
+            (userService.user.role == 'ADMIN' ||
+            userService.user.role == 'MODERATOR') &&
+            module.finished === 1 &&
+            module.approved === 0"
+            (click)="iconApprove(module.id)">
+            <p>&#xf00c;</p>
+          </div>
+          <div class="icon test" *ngIf="
+            (
+              userService.user.id == module.owner &&
+              module.finished === 0
+            ) ||
+            (
+              userService.user.role == 'MODERATOR' &&
+              module.finished === 0
+            ) ||
+            (
+              userService.user.role == 'ADMIN' &&
+              module.finished === 0
+            )||
+            (
+              userService.user.role == 'MODERATOR' &&
+              module.finished === 1 &&
+              module.approved === 0
+            ) ||
+            (
+              userService.user.role == 'ADMIN' &&
+              module.finished === 1 &&
+              module.approved === 0
+            )"
+            (click)="iconPlay(module.id, module.type, module.name)"
+            >
+            <p>&#xf054;</p>
+          </div>
+          <div class="icon deny small" *ngIf="
+            (userService.user.role == 'ADMIN' ||
+            userService.user.role == 'MODERATOR') &&
+            module.finished === 1 &&
+            module.approved === 0"
+            (click)="iconDisapprove(module.id)">
+            <p>&#xf00d;</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

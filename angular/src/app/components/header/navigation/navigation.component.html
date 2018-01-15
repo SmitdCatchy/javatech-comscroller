@@ -1,0 +1,21 @@
+<ul>
+  <a routerLink="" routerLinkActive="selected" [routerLinkActiveOptions]="{ exact: true }"><li class=""><div>Index</div></li></a>
+  <a routerLink="modules" routerLinkActive="selected" [routerLinkActiveOptions]="{ exact: true }"><li class=""><div>Modules</div></li></a>
+  <a *ngIf="userService.user.role === 'GUEST'; else elseBlock" routerLink="login" routerLinkActive="selected" [routerLinkActiveOptions]="{ exact: true }">
+    <li class="">
+      <div >Log in</div>
+    </li>
+  </a>
+
+  <ng-template #elseBlock>
+
+    <a *ngIf="router.url.includes('profile')" (click)="logout()">
+      <li class="">
+        <div >Logout</div>
+      </li>
+    </a>
+    <a routerLink="profile" routerLinkActive="disabled" [routerLinkActiveOptions]="{ exact: true }"><li class=""><div>{{userService.user.nickname}}</div></li></a>
+
+  </ng-template>
+
+</ul>

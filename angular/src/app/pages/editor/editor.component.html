@@ -1,0 +1,267 @@
+<div id="editor" [style.min-height.px]="container_min_height">
+
+  <div id="properties" *ngIf="moduleId === 0; else editor">
+    <input class="text-input" type="text" [(ngModel)]="moduleName" placeholder="Module Name">
+    <form class="type">
+      <ul>
+        <li *ngFor="let type of types; let idx = index">
+          <input type="radio" id="{{ type.name }}" name="selector" (change)="onSelectionChange(type)" [value]="type.id" [checked]="(idx === selectedId)">
+          <label for="{{ type.name }}">
+            {{ type.name }}
+            <div class="check"><div class="inside"></div></div>
+          </label>
+        </li>
+      </ul>
+    </form>
+    <input class="text-input" type="text" [(ngModel)]="moduleImg" placeholder="Module Image Source"><br>
+    <textarea class="text-area" style="margin-top: 0px;" maxlength="100" [(ngModel)]="moduleDesc" placeholder="Description"></textarea><br>
+
+    <button type="button" name="button" (click)="createModule()" [disabled]="invalid()">Create</button>
+
+  </div>
+  <ng-template #editor>
+    <ul id="editor-menu">
+      <li class="{{prop_active}}" (click)="switch('p')" title="Module Properties"><p>&#xf15c;</p></li>
+      <li class="{{graph_active}}" (click)="switch('g')" title="Scenes Graph"><p>&#xf0e8;</p></li>
+      <li class="{{blueprint_active}}" (click)="switch('b')" title="Scene Editor"><p>&#xf247;</p></li>
+      <li class="{{canvas_active}}" (click)="switch('c')" title="Canvas"><p>&#xf212;</p></li>
+      <li class="{{folder_active}}" (click)="switch('f')" title="Folder"><p>&#xf07c;</p></li>
+    </ul>
+
+    <!-- SUMMARY -->
+    <div class="separator {{sum_active}}"></div>
+    <div class="{{sum_active}}">
+      <h3>To edit the module choose from the apparent options above.</h3>
+    </div>
+
+    <!-- PROPERTIES -->
+    <div class="separator {{prop_active}}"></div>
+    <div id="properties" class="{{prop_active}}">
+      <div class="module-img"
+        [ngStyle]="{'background-image':'url(' + moduleImgDisp + ')'}"
+      ></div>
+      <input class="text-input" type="text" [(ngModel)]="moduleName" placeholder="Module Name">
+      <form class="type">
+        <ul>
+          <li *ngFor="let type of types; let idx = index">
+            <input type="radio" id="{{ type.name }}" name="selector" (change)="onSelectionChange(type)" [value]="type.id" [checked]="(idx === selectedId)">
+            <label for="{{ type.name }}">
+              {{ type.name }}
+              <div class="check"><div class="inside"></div></div>
+            </label>
+          </li>
+        </ul>
+      </form>
+      <input class="text-input" type="text" [(ngModel)]="moduleImg" placeholder="Module Image Source"><br>
+      <textarea class="text-area" style="margin-top: 0px;" maxlength="100" [(ngModel)]="moduleDesc" placeholder="Description"></textarea><br>
+
+      <div class="checker">
+       <p>My module should be available for everyone.</p>
+         <section>
+           <div class="checkbox">
+             <input type="checkbox" value="public" id="checkboxInput" name="" [checked]="isPublic" (change)="isPublic = (isPublic === 0)?1:0"/>
+             <label for="checkboxInput"></label>
+          </div>
+        </section>
+      </div>
+
+      <div class="checker">
+       <p>My module is ready to be published*.</p>
+         <section>
+           <div class="checkbox">
+             <input type="checkbox" value="ready" id="checkboxInput" name="" [checked]="isFinished" (change)="isFinished = (isFinished === 0)?1:0"/>
+             <label for="checkboxInput"></label>
+          </div>
+        </section>
+      </div>
+
+      <button type="button" name="button" (click)="setModule()" [disabled]="invalid()">Submit</button>
+      <p class="note" *ngIf="isFinished === 1">
+        If you selected this module to be published a Moderator will determine if it fits the required criteria to be published.<br>
+        If it is successfully published you will lose all your rights to edit this module, but if you need to edit the module you
+        can revoke its release, but if you do so, this module will lose its tracked rating and view count.
+      </p>
+    </div>
+
+    <!-- GRAPH -->
+    <div class="separator {{graph_active}}"></div>
+    <div id="graph" class="{{graph_active}}">
+      <h3>ISOLATED SCENES</h3>
+      <div class="isolated">
+
+        <div id="node-new"  class="node" (click)="createScene()">
+          <div class="node-body" (mouseenter)="hovered(0)" >&#xf067;</div>
+        </div>
+        <div id="node-del"  class="node" (click)="deleteScene()" >
+          <div class="node-body" (mouseenter)="hovered(0)" >&#xf00d;</div>
+        </div>
+        <div id="node-{{node.id}}"  class="node" *ngFor="let node of isolated">
+          <div [ngClass]="{'highlight': isOver(node.id), 'selected' : isSelected(node.id)}" class="node-body isolated-node"
+            (click)="select(node.id, node.mask)" (mouseenter)="hovered(node.id)">{{node.mask}}</div>
+        </div>
+      </div>
+      <h3>GRAPH</h3>
+      <div id="check" class="graph">
+
+        <div class="level" *ngFor="let level of pos_nodes; let i = index">
+          <div id="node-{{node.id}}"  class="node" *ngFor="let node of level">
+            <div [ngClass]="
+            {
+             'highlightchild': isOverParent(node.id) || isOnPath(node.id),
+             'highlight': isOver(node.id),
+             'selected' : isSelected(node.id),
+             'unreachable' : isUnreachable(node.id) ,
+             'root' : node.id === startId ,
+             'deadend' : isDeadend(node.id)
+           }" class="node-body" (click)="select(node.id, node.mask)" (dblclick)="showPathFromRoot(node.id)"
+           (mouseenter)="hovered(node.id)">{{node.mask}} {{index}}</div>
+          </div>
+        </div>
+
+        <div id="line-{{link.from}}-{{link.to}}" [ngClass]="{
+            'unreachable' : isUnreachable(link.from),
+            'highlightline': isOver(link.from),
+            'highlightlinepath': isLineOnPath(link.from, link.to)
+          }" class="node-line" *ngFor="let link of links"
+          [style.height.px]="100"></div>
+
+      </div>
+
+    </div>
+
+    <!-- BLUEPRINT -->
+    <div class="separator {{blueprint_active}}"></div>
+    <div id="plan" class="{{blueprint_active}}">
+      <div id="blueprint"
+      (mousemove)="onMouseMove($event)" (mouseup)="onMouseButton($event,'none', 0)" (mouseleave)="onMouseButton($event,'none', 0)"
+      (touchmove)="onMouseMove($event)" (touchend)="onMouseButton($event,'none', 0)" (touchcancel)="onMouseButton($event,'none', 0)" >
+        <div #obj{{curr.obj.id}} id="obj{{curr.obj.id}}" class="object" *ngFor="let curr of currentObjects" style="position:absolute;"
+                [style.left.px] = "stageX(curr.obj.x)"
+                [style.top.px] = "stageY(curr.obj.y)"
+                [style.width.px] = "stageX(curr.obj.w)"
+                [style.height.px] = "stageY(curr.obj.h)"
+                [style.zIndex] = "curr.obj.z"
+              >
+
+          <div class="move" (mousedown)="onMouseButton($event,'drag',curr.obj.id)" (draggable)="onMouseButton($event,'drag',curr.obj.id)"
+            [ngClass]="{ 'move-selected' : curr.mask === currentObject.mask }"
+          >
+          </div>
+
+          <div class="n-resize activeresize" (mousedown)="onMouseButton($event,'n',curr.obj.id)" (touchstart)="onMouseButton($event,'n',curr.obj.id)"
+            [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+          <div class="s-resize" (mousedown)="onMouseButton($event,'s',curr.obj.id)" (touchstart)="onMouseButton($event,'s',curr.obj.id)"
+            [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+          <div class="w-resize" (mousedown)="onMouseButton($event,'w',curr.obj.id)" (touchstart)="onMouseButton($event,'w',curr.obj.id)"
+            [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+          <div class="e-resize" (mousedown)="onMouseButton($event,'e',curr.obj.id)" (touchstart)="onMouseButton($event,'e',curr.obj.id)"
+            [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+          <div class="nw-resize" (mousedown)="onMouseButton($event,'nw',curr.obj.id)" (touchstart)="onMouseButton($event,'nw',curr.obj.id)">
+            <div class="nw-resize-n"
+              [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+            <div class="nw-resize-w"
+              [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+          </div>
+          <div class="ne-resize" (mousedown)="onMouseButton($event,'ne',curr.obj.id)" (touchstart)="onMouseButton($event,'ne',curr.obj.id)">
+            <div class="ne-resize-n"
+              [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+            <div class="ne-resize-e"
+              [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+          </div>
+          <div class="sw-resize" (mousedown)="onMouseButton($event,'sw',curr.obj.id)" (touchstart)="onMouseButton($event,'sw',curr.obj.id)">
+            <div class="sw-resize-s"
+              [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+            <div class="sw-resize-w"
+              [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+          </div>
+          <div class="se-resize" (mousedown)="onMouseButton($event,'se',curr.obj.id)" (touchstart)="onMouseButton($event,'se',curr.obj.id)">
+            <div class="se-resize-s"
+              [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+            <div class="se-resize-e"
+              [ngStyle]="{'border-color': curr.mask === currentObject.mask ? '#0F0' : ''}"></div>
+          </div>
+        </div>
+        <div class="mask" *ngFor="let curr of currentObjects" (mousedown)="onMouseButton($event,'drag',curr.obj.id)" (touchstart)="onMouseButton($event,'drag',curr.obj.id)"
+          (click)="LOG(curr.obj.action.split(':'))"
+          [style.left.px] = "stageX(curr.obj.x) + stageX(curr.obj.w)/2 - 15"
+          [style.top.px] = "stageY(curr.obj.y) + stageY(curr.obj.h)/2 - 15"
+          [style.zIndex] = "curr.obj.z + 2000"
+          [ngClass]="{
+            'listener' : curr.obj.action.split(':')[0] !== 'none' ,
+            'action' : curr.obj.action.split(':')[0] !== 'none' && curr.obj.action.split(':')[1] !== '',
+            'target' : curr.obj.action.split(':')[0] !== 'none' && curr.obj.action.split(':')[1] !== '' && curr.obj.action.split(':')[2] !== ''
+          }"
+        >{{curr.mask}}</div>
+      </div>
+
+      <div id="objectparams" *ngIf="selectedMask !== -1">
+        <!-- <h3>Selected Object: {{maskId}}</h3> -->
+        <div id="sceneproperties"
+          [ngStyle]="{'display': (sceneProp)?'block':'none' }"
+        >
+        <textarea class="text-area" type="text" [(ngModel)]="currentScene.background" placeholder="Background"></textarea>
+
+        </div>
+        <div id="objectproperties"
+          [ngStyle]="{'display': (objectProp)?'block':'none' }"
+        >
+          <input class="text-input-editor" type="text" [(ngModel)]="currentObject.obj.type" placeholder="Type">
+          <input class="text-input-editor" type="text" [(ngModel)]="currentObject.maskAction" (input)="maskingAction()" placeholder="Action">
+          <input class="text-input-editor" type="text" [(ngModel)]="currentObject.obj.event" placeholder="Event">
+          <br>
+          <textarea class="text-area" type="text" [(ngModel)]="currentObject.obj.cont" placeholder="Content"></textarea>
+          <br>
+          <textarea class="text-area" type="text" [(ngModel)]="currentObject.obj.style" placeholder="Style"></textarea>
+          <br>
+          <input class="text-input-editor" type="text" [(ngModel)]="currentObject.obj.x" placeholder="Coordinate X">
+          <input class="text-input-editor" type="text" [(ngModel)]="currentObject.obj.y" placeholder="Coordinate Y">
+          <input class="text-input-editor" type="text" [(ngModel)]="currentObject.obj.z" placeholder="Coordinate Z">
+          <br>
+          <input class="text-input-editor" type="text" [(ngModel)]="currentObject.obj.w" placeholder="Width">
+          <input class="text-input-editor" type="text" [(ngModel)]="currentObject.obj.h" placeholder="Height">
+        </div>
+        <div id="editbuttons">
+          <button title="Scene Properties"(click)="toggleSceneProp()"
+            [ngStyle]="{'color': (sceneProp)?'#0C0':'' }"
+          ><p>&#xf022;</p></button>
+          <button title="Object Properties" (click)="toggleObjectProp()"
+            [ngStyle]="{'color': (objectProp)?'#0C0':'' }"
+          ><p>&#xf03e;</p></button>
+          <button title="Add Object" class="addObject" (click)="addObject()" ><p>&#xf055;</p></button>
+          <button  title="Remove Selected Object" class="removeObject"(click)="removeObject(maskId)" [disabled]="maskId === 1 || currentObject.obj.action !== 'none' ">
+            <p>&#xf056;</p></button>
+          <button title="Upload Changes Properties" class="uploadChanges" (click)="submitScene()" ><p>&#xf0ee;</p></button>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- CANVAS -->
+    <div class="separator {{canvas_active}}"></div>
+    <div id="displayCanvas" class="{{canvas_active}}">
+      <div id="stage">
+
+        <div id="current" class=" scene {{currentAnim}} " [ngClass]="getCurrentAct()"
+        [ngStyle]="canvasScene.getStyle()">
+          <div id="sceneObject" *ngFor ="let obj of canvasScene.objects"
+            class="{{activeEvent(obj.getEvents())}}"
+            [ngClass]="{'link' : obj.action.split(':')[0] === 'click'}"
+            (click)="handleSceneClicks(obj.action)"
+            [ngStyle]="obj.getStyle(canvasDisplayW, canvasDisplayH)"
+          >
+            <p *ngIf="obj.type === 'txt'">{{obj.cont}}</p>
+          </div>
+        </div>
+      </div>
+      <div id="canvasbuttons">
+        <!-- <button (click)="toggleSceneProp()" >&#xf022;</button> -->
+        <button (click)="prevAct()" >&#xf0a8;</button>
+        <button disabled >{{currentAct}}</button>
+        <button (click)="nextAct()" >&#xf0a9;</button>
+        <!-- <button (click)="submitScene()" >&#xf0ee;</button> -->
+      </div>
+    </div>
+
+  </ng-template>
+
+</div>

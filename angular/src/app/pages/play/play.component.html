@@ -1,0 +1,38 @@
+<div id="play" [style.min-height.px]="container_min_height">
+  <div id="stage"
+    [ngStyle]="{
+      'position' : fullscreen ? 'absolute' : '',
+      'top' : fullscreen ? '0' : '',
+      'left' : fullscreen ? '0' : '',
+      'z-index' : fullscreen ? '9001' : '',
+      'width' : fullscreen ? document_width+'px' : '',
+      'height' : fullscreen ? document_height+'px' : '',
+      'opacity' : fullscreenOnce ? resizeCorrection() : ''}"
+  >
+    <div id="even" class=" scene {{animEven}} " [ngClass]="getEvenAct()"
+      [ngStyle]="evenScene.getStyle()"
+    >
+      <div id="sceneObject" *ngFor ="let obj of evenScene.objects"
+      class="{{activeEvenEvent(obj.getEvents())}}"
+      [ngClass]="{'link' : obj.action.split(':')[0] === 'click'}"
+      (click)="handleSceneClicks(obj.action)"
+      [ngStyle]="obj.getStyle(stageW, stageH)"
+      >
+        <p *ngIf="obj.type === 'txt'">{{obj.cont}}</p>
+      </div>
+    </div>
+
+    <div id="odd" class=" scene {{animOdd}} " [ngClass]="getOddAct()"
+      [ngStyle]="oddScene.getStyle()"
+    >
+      <div id="sceneObject" *ngFor ="let obj of oddScene.objects"
+      class="{{activeOddEvent(obj.getEvents())}}"
+      [ngClass]="{'link' : obj.action.split(':')[0] === 'click'}"
+      (click)="handleSceneClicks(obj.action)"
+      [ngStyle]="obj.getStyle(stageW, stageH)"
+      >
+        <p *ngIf="obj.type === 'txt'">{{obj.cont}}</p>
+      </div>
+    </div>
+  </div>
+</div>

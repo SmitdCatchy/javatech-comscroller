@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "body-parser": "*",
+    "core-js": "*",
+    "express": "*",
+    "express-myconnection": "*",
+    "mysql": "*",
+    "rxjs": "*",
+    "serve-favicon": "*",
+    "cors": "*"
+  }
+}
