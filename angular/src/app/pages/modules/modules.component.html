@@ -49,8 +49,6 @@
             module.rate < 5" class="star-half s5">★</div>
           <div *ngIf="module.rate >= 5" class="star s5">★</div>
         </div>
-        <!-- <div class="module-description"><p>{{module.description}}</p></div> -->
-
         <div class="icons">
           <div class="icon play" *ngIf="
             (
@@ -81,7 +79,7 @@
             module.approved === 1)
             ||
             (userService.user.id == module.owner &&
-            userService.user.id == 'USER' &&
+            userService.user.role == 'USER' &&
             module.finished === 1 &&
             module.approved === 1)"
             (click)="iconDisapprove(module.id)">

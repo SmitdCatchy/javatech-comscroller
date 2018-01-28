@@ -25,7 +25,6 @@
   flex-wrap: wrap;
   align-items: center;
 }
-
 .text-input{
   font-family: CGB;
   font-size: 120%;
@@ -43,14 +42,12 @@
       outline: none;
     }
 }
-
 .checkers{
   width: 90%;
   display: flex;
   justify-content: center;
 
 }
-
 .checker{
   font-family: CGR;
   color: #FFF;
@@ -65,12 +62,10 @@
   align-items: center;
   margin: 5px -40px 5px 70px;
 }
-
 .checker p{
   font-family: CGB;
   margin: 5px;;
 }
-
 .checkbox input[type=checkbox] {
   opacity: 0;
   width: 80px;
@@ -241,7 +236,6 @@
     text-shadow: 0 0 5px #EB0;
   }
 }
-
 .s{
   &1{
     position: absolute;
@@ -269,8 +263,6 @@
     top: 0;
   }
 }
-
-
 .icons{
   width: 100%;
   display: flex;
@@ -361,14 +353,7 @@
   margin-top:  0px;
   text-shadow: none;
 
-
-
   transition: color 0.5s, text-shadow 0.5s;
-
-  // &:hover{
-  //   color: #FA0;
-  //   text-shadow: 0 0 10px #FA0;
-  // }
 }
 .add p{
   font-family: ICON;

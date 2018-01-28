@@ -1,5 +1,7 @@
 import { Component, OnInit, AfterViewChecked, HostListener, Renderer2, ChangeDetectorRef } from '@angular/core';
 
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+
 import { ModuleService } from '../../services/module.service';
 import { SceneService } from '../../services/scene.service';
 import { UserService } from "../../services/user.service";
@@ -9,6 +11,10 @@ import { Scene, SceneObject } from '../../models/Scene';
 import {ActivatedRoute, Router} from "@angular/router";
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/forkJoin';
+
+import { FormBuilder } from '@angular/forms';
+import { Http, Response, Headers } from "@angular/http";
+import {Routes, Server} from "../../utils/ServerRoutes";
 
 @Component({
   selector: 'app-editor',
@@ -24,7 +30,8 @@ export class EditorComponent implements OnInit, AfterViewChecked {
     private route: ActivatedRoute,
     private router : Router,
     private renderer: Renderer2,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public http: Http
   ){
   }
 
@@ -47,32 +54,39 @@ export class EditorComponent implements OnInit, AfterViewChecked {
         t.approvedBy, t.published, t.views, t.rate
       );
 
-      this.moduleName = this.current.name;
+      if(this.userService.user.id !== t.owner){
+        this.router.navigate(['modules']);
+      }
+      else{
+        this.moduleName = this.current.name;
 
-      if(this.current.type === "Comic"){
-        this.selectedId = 0;
-        this.selectedType.name = "Comic";
-        this.selectedType.id = 1;
-      }
-      if(this.current.type === "Adventure"){
-        this.selectedId = 1;
-        this.selectedType.name = "Adventure";
-        this.selectedType.id = 2;
-      }
-      if(this.current.type === "Novel"){
-        this.selectedId = 2;
-        this.selectedType.name = "Novel";
-        this.selectedType.id = 3;
-      }
+        if(this.current.type === "Comic"){
+          this.selectedId = 0;
+          this.selectedType.name = "Comic";
+          this.selectedType.id = 1;
+        }
+        if(this.current.type === "Adventure"){
+          this.selectedId = 1;
+          this.selectedType.name = "Adventure";
+          this.selectedType.id = 2;
+        }
+        if(this.current.type === "Novel"){
+          this.selectedId = 2;
+          this.selectedType.name = "Novel";
+          this.selectedType.id = 3;
+        }
 
-      this.moduleImg = this.current.image;
-      this.moduleImgDisp = this.current.imageToLoad;
-      this.moduleDesc = this.current.description;
-      this.isPublic = this.current.isPublic;
-      this.isFinished = this.current.finished;
-    //GRAPH
-      this.startId = this.current.startscene;
-      this.fillArrays(false, []);
+        this.moduleImg = this.current.image;
+        this.moduleImgDisp = this.current.imageToLoad;
+        this.moduleDesc = this.current.description;
+        this.isPublic = this.current.isPublic;
+        this.isFinished = this.current.finished;
+      //GRAPH
+        this.startId = this.current.startscene;
+        this.fillArrays(false, []);
+        // FOLDER
+        this.fillFolder();
+      }
     });
     }
   }
@@ -84,9 +98,9 @@ export class EditorComponent implements OnInit, AfterViewChecked {
 
   // EDITOR
   sum_active = false;
-  prop_active = false;
+  prop_active = true;
   graph_active = false;
-  blueprint_active = true;
+  blueprint_active = false;
   canvas_active = false;
   folder_active = false;
   switch(w : string){
@@ -100,6 +114,9 @@ export class EditorComponent implements OnInit, AfterViewChecked {
     if(this.graph_active)setTimeout(()=>{ this.drawLines(); }, 10);
     if(this.blueprint_active)setTimeout(()=>{ this.setCanvas(); }, 10);
     if(this.canvas_active)setTimeout(()=>{ this.setCanvasDisplay(); }, 10);
+    if(this.folder_active)setTimeout(()=>{ this.fillFolder(); }, 10);
+
+    this.fileNames = [];
 
     if(
       this.prop_active === false &&
@@ -107,9 +124,9 @@ export class EditorComponent implements OnInit, AfterViewChecked {
       this.blueprint_active === false &&
       this.canvas_active === false &&
       this.folder_active === false
-    ) this.prop_active = true;
-    // ) this.sum_active = true;
-    // else this.sum_active = false;
+    // ) this.prop_active = true;
+    ) this.sum_active = true;
+    else this.sum_active = false;
   }
   //PROPERTIES
   current : Module;
@@ -154,9 +171,9 @@ export class EditorComponent implements OnInit, AfterViewChecked {
     ).subscribe(result => {
       if(this. isFinished){
         this.router.navigate(['modules']);
+      }else{
+        this.ngOnInit();
       }
-
-      this.ngOnInit();
     });
   }
   createModule(){
@@ -323,11 +340,6 @@ export class EditorComponent implements OnInit, AfterViewChecked {
                 this.currentObjects.push(obj);
               }
 
-              for( const obj of node.objects){
-                this.currentObjects.push(obj);
-              }
-
-
               for( const scene of this.canvasScenes){
                 if( scene.id === this.sceneId ){
                   let max = 1;
@@ -368,6 +380,8 @@ export class EditorComponent implements OnInit, AfterViewChecked {
         setTimeout(()=>{ this.drawLines(); }, 0);
         setTimeout(()=>{ this.setCanvas(); }, 0);
         setTimeout(()=>{ this.setCanvasDisplay(); }, 0);
+
+        this.addingNode = false;
       });
     });
   }
@@ -689,9 +703,15 @@ export class EditorComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  addingNode = false;
+
   createScene(){
+    this.addingNode = true;
     this.sceneService.createSceneByModuleId(this.moduleId).subscribe(res => {
-      this.fillArrays(false, []);
+
+      setTimeout(()=>{
+        this.fillArrays(false, []);
+      }, 450);
     });
   }
   deleteScene(){
@@ -749,19 +769,18 @@ export class EditorComponent implements OnInit, AfterViewChecked {
       }
 
       Observable.forkJoin(promises).subscribe(res =>{
-        console.log(res);
         this.fillArrays(true, [this.objectId, this.maskId]);
       });
     });
   }
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!FOCUS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   addObject(){
     for( const scene of this.nodes){
       if(scene.id === this.sceneId){
 
         this.sceneService.createSceneObjectBySceneId(this.sceneId).subscribe(result => {
           let newObj = {
-            "mask" : this.currentObjects.length ,
+            "mask" : this.currentObjects[this.currentObjects.length-1].mask +1 ,
             "maskAction" : "none",
             "obj" : {
               "id": result.objectId,
@@ -779,7 +798,17 @@ export class EditorComponent implements OnInit, AfterViewChecked {
             }
           };
           scene.objects.push(newObj);
+          for( let i = 0; i < scene.objects.length;){
+            scene.objects[i].mask = ++i;
+          }
           this.currentObjects.push(newObj);
+          for( let i = 0; i < this.currentObjects.length;){
+             this.currentObjects[i].mask = ++i;
+          }
+
+          this.objectId = this.currentObjects[this.currentObjects.length-1].obj.id;
+          this.maskId = this.currentObjects[this.currentObjects.length-1].mask;
+          this.currentObject = this.currentObjects[this.currentObjects.length-1];
         });
       }
     }
@@ -794,6 +823,9 @@ export class EditorComponent implements OnInit, AfterViewChecked {
                 scene.objects.splice(o,1);
               }
             }
+            for( let i = 0; i < scene.objects.length;){
+              scene.objects[i].mask = ++i;
+            }
           }
         }
         for( let o = 0; o < this.currentObjects.length; o++){
@@ -801,8 +833,12 @@ export class EditorComponent implements OnInit, AfterViewChecked {
             this.currentObjects.splice(o,1);
           }
         }
+        for( let i = 0; i < this.currentObjects.length;){
+           this.currentObjects[i].mask = ++i;
+        }
         this.objectId = this.currentObjects[0].obj.id;
         this.maskId = this.currentObjects[0].mask;
+        this.currentObject = this.currentObjects[0];
       });
     }
   }
@@ -1192,11 +1228,9 @@ export class EditorComponent implements OnInit, AfterViewChecked {
 
   getCurrentAct():string{
     if(this.initialEvent) {
-      // console.log("pas");
       return "pas" + this.currentAct;
     }
     else{
-      // console.log("act");
       return "act" + this.currentAct;
     }
   }
@@ -1250,6 +1284,89 @@ export class EditorComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  // FOLDER
+
+  folder = [];
+
+  fileNames = [];
+
+  fillFolder(){
+    this.userService.getFiles().subscribe(result => {
+      this.folder = result.files.sort(function(a, b){
+        if(a.firstname < b.firstname) return -1;
+        if(a.firstname > b.firstname) return 1;
+        return 0;
+      });
+    });
+  }
+
+  selectName(name: string){
+    let f = -1;
+    for(let i = 0; i < this.fileNames.length; i++){
+      if( this.fileNames[i] === name) f = i;
+    }
+    if( f !== -1){
+      this.fileNames.splice(f,1);
+    }
+    else this.fileNames.push(name);
+  }
+  isSelectedFile(name: string):boolean{
+    for(const f of this.fileNames){
+      if( f === name) return true;
+    }
+    return false;
+  }
+
+  deleteFile(){
+    if(this.fileNames.length > 0){
+      let promises = [];
+      for(const fileName of this.fileNames){
+        let promise = this.userService.deleteFile( fileName );
+        promises.push(promise);
+      }
+      Observable.forkJoin(promises).subscribe(result => {
+        this.fileNames = [];
+        this.ngOnInit();
+      });
+    }
+  }
+
+  getFileUrl(file:string):string{
+    return "url('../../../../media/"+this.userService.user.id+"/"+file+"')";
+  }
+
+
+  filesToUpload: FileList = null;
+
+  selectedFiles = true;
+  uploading = false;
+
+  handleFileInput(files: FileList) {
+    this.fileNames = [];
+    this.filesToUpload = files;
+    if(this.filesToUpload !== null){
+      this.selectedFiles = this.filesToUpload.length <= 0;
+    }
+  }
+  uploadFiles() {
+    if(this.filesToUpload !== null){
+      this.selectedFiles = true;
+      this.uploading = true;
+      this.userService.uploadFiles(this.filesToUpload).subscribe(data => {
+        setTimeout(()=>{
+          this.userService.getFiles().subscribe(result => {
+            this.folder = result.files.sort(function(a, b){
+              if(a.firstname < b.firstname) return -1;
+              if(a.firstname > b.firstname) return 1;
+              return 0;
+            });
+            this.filesToUpload = null;
+            this.uploading = false;
+          });
+        }, 500);
+      });
+    }
+  }
   // min-height
   document_height = document.documentElement.clientHeight;
   document_width = document.documentElement.clientHeight;

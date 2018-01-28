@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 
 import { ModuleService } from '../../services/module.service';
 import { UserService } from "../../services/user.service";
-import { CarrierService } from "../../services/carrier.service";
+import { EditorService } from "../../services/editor.service";
 import { Module } from '../../models/Module';
 
 import {ActivatedRoute, Router} from "@angular/router";
@@ -21,7 +21,7 @@ export class ModulesComponent implements OnInit {
   constructor(
     private moduleService: ModuleService,
     public userService: UserService,
-    public carrierService: CarrierService,
+    public editorService: EditorService,
     private route: ActivatedRoute,
     private router : Router
   ){}

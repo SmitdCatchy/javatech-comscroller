@@ -10,15 +10,15 @@ const app = express();
 const mysql = require('mysql');
 const connection = require('express-myconnection');
 app.use(connection(mysql,{
-  host: "",
-  user: "",
-  password: "",
-  database: ""
+  host: "localhost",
+  user: "root",
+  password: "root",
+  database: "database"
 }, 'request'));
 // favicon setup
 app.use(favicon(path.join(__dirname, 'dist/media/images', 'cms_logo.png')));
 
-// CORS - for testing
+// CORS
 const cors=require('cors');
 app.use(cors());
 

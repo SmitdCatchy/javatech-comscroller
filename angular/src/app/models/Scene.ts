@@ -18,9 +18,18 @@ export class Scene {
     if(_background === "none"){
       this.background = "#000";
     }
-    else{
-      this.background = _background;
+    else if(
+      _background.trim().charAt(0) === 'h' ||
+      _background.trim().charAt(0) === "#" ||
+      _background.trim().charAt(0) === "r"
+    ){
+      this.background = _background.trim();
     }
+    else{
+      this.background = '../../../../media/' + _background.trim();
+    }
+
+    console.log()
 
     this.objects= _objects;
 
@@ -45,18 +54,9 @@ export class Scene {
         'background': this.background
       }
     }
-    else if(this.background.split(':')[0] === 'http' ||this.background.split(':')[0] === 'https'){
-      return {
-        'background-image'          : 'url(' + this.background + ')',
-        'background-repeat'   : 'no-repeat',
-        'background-position' : 'center',
-        'background-size'     : '100% 100%'
-      }
-
-    }
     else{
       return {
-        'background-image'          : 'url(../../../../media/' + this.background + ')',
+        'background-image'          : 'url(' + this.background + ')',
         'background-repeat'   : 'no-repeat',
         'background-position' : 'center',
         'background-size'     : '100% 100%'
@@ -112,14 +112,38 @@ export class SceneObject {
     if(_event === "10" || _event.slice(-2) === "10") this.max = "10";
     else if(isNaN(+_event.slice(-1))) this.max = "1";
     else this.max = _event.slice(-1);
+
+    if(_type === 'img' && _cont !== '' && _cont.charAt(0) !== "#"){
+      if(_cont.split(':')[0] === 'http' || _cont.split(':')[0] === 'https' ||
+          _cont.trim().charAt(0) === 'h' ||
+          _cont.trim().charAt(0) === "#" ||
+          _cont.trim().charAt(0) === "r"){
+        this.imageToPreload = _cont;
+      }
+      else{
+        this.imageToPreload = '../../../../media/'+_cont;
+      }
+    }
+    else{
+      const attributes = this.style.split(';');
+      for(const atr of attributes){
+        const datas = atr.split(":");
+        if(datas[0] === 'background'){
+          const bg = datas[1];
+          if(bg !== '' && bg.charAt(0) !== "#" && bg.trim().charAt(0) !== "r"){
+            if(bg.split(':')[0] === 'http' || bg.split(':')[0] === 'https'){
+              this.imageToPreload = bg;
+            }
+            else{
+              this.imageToPreload = '../../../../media/'+bg;
+            }
+          }
+        }
+      }
+    }
   }
 
   getEvents(): any[]{
-
-    // console.log(actClass);
-
-    // let act = +actClass.slice(3);
-    // console.log(act);
 
     if(this.event.charAt(1) === '-'){
       let limits = this.event.split('-');
@@ -160,8 +184,11 @@ export class SceneObject {
     let bg : string = '#FFF';
     let bgs = 'cover';
 
+    let transform = '';
+
     let color = '#000';
     let size = this.stageX(30, w) + 'px';
+    let weight = '';
     let family = 'CGR';
     let style = 'normal';
     let textShadow = '';
@@ -180,11 +207,40 @@ export class SceneObject {
     const attributes = this.style.split(';');
     for(const atr of attributes){
       const datas = atr.split(":");
+
+      // switch (datas[0].trim()) {
+      //   case 'color' : color = datas[1]; break;
+      //   case 'transform' : transform = datas[1]; break;
+      //   case 'font-size' : size = this.stageX(+datas[1].match(/\d+/)[0], w)+ 'px'; break;
+      //   case 'font-weight' : weight = datas[1]; break;
+      //   case 'font-family' : family = datas[1]; break;
+      //   case 'font-style' : style = datas[1]; break;
+      //   case 'text-shadow' : textShadow = datas[1]; break;
+      //   case 'text-align' : align = datas[1]; break;
+      //   case 'border' : border = datas[1]; break;
+      //   case 'border-radius' : radius = datas[1]; break;
+      //   case 'box-shadow' : boxShadow = datas[1]; break;
+      //   case 'margin' : margin = datas[1]; break;
+      //   case 'padding' : padding = datas[1]; break;
+      //   case 'display' : display = datas[1]; break;
+      //   case 'opacity' : opacity = datas[1]; break;
+      //   case 'overflow' : overflow = datas[1]; break;
+      //   case 'img' : bg =  this.cont; bgs = 'contain'; break;
+      //   case 'background' : bg = datas[1]; break;
+      //   case 'scale' : bgs = datas[1]; break;
+      // }
+
       if(datas[0].trim() === 'color'){
         color = datas[1];
       }
+      if(datas[0].trim() === 'transform'){
+        transform = datas[1];
+      }
       if(datas[0].trim() === 'font-size'){
         size = this.stageX(+datas[1].match(/\d+/)[0], w)+ 'px';
+      }
+      if(datas[0].trim() === 'font-weight'){
+        weight = datas[1];
       }
       if(datas[0].trim() === 'font-family'){
         family = datas[1];
@@ -237,20 +293,9 @@ export class SceneObject {
 
     }
 
-    if(bg !== '' && bg.charAt(0) !== "#"){
-      this.imageToPreload = bg;
-    }
     if(bg === "none"){
       bg = "#000";
     }
-
-    // console.log("#####-BEGIN-#####");
-    // console.log(bg);
-    // console.log(bg.charAt(0));
-    // console.log(bg.split('(')[0]);
-    // console.log(bg.split(':')[0]);
-    // console.log("#####-END-#####");
-
 
     if(
       bg.charAt(0) === "#" ||
@@ -264,9 +309,11 @@ export class SceneObject {
         'width'           : width,
         'height'          : height,
         'z-index'         : z,
+        'transform'       : transform,
 
         'color'           : color,
         'font-size'       : size,
+        'font-weight'     : weight,
         'font-family'     : family,
         'font-style'      : style,
         'text-shadow'     : textShadow,
@@ -297,9 +344,11 @@ export class SceneObject {
         'width'           : width,
         'height'          : height,
         'z-index'         : z,
+        'transform'       : transform,
 
         'color'           : color,
         'font-size'       : size,
+        'font-weight'     : weight,
         'font-family'     : family,
         'font-style'      : style,
         'text-shadow'     : textShadow,
@@ -334,9 +383,11 @@ export class SceneObject {
         'width'           : width,
         'height'          : height,
         'z-index'         : z,
+        'transform'       : transform,
 
         'color'           : color,
         'font-size'       : size,
+        'font-weight'     : weight,
         'font-family'     : family,
         'font-style'      : style,
         'text-shadow'     : textShadow,

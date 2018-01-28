@@ -11,3 +11,6 @@ router.use('/scene', Scene);
 
 var SceneObject = require('./api/object');
 router.use('/object', SceneObject);
+
+var Files = require('./api/file');
+router.use('/file', Files);

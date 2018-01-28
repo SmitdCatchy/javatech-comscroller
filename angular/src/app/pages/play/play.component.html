@@ -2,37 +2,39 @@
   <div id="stage"
     [ngStyle]="{
       'position' : fullscreen ? 'absolute' : '',
-      'top' : fullscreen ? '0' : '',
-      'left' : fullscreen ? '0' : '',
+      'top' : fullscreen ? '50%' : '',
+      'left' : fullscreen ? '50%' : '',
+      'transform' : fullscreen ? 'translate(-50%, -50%)' : '',
       'z-index' : fullscreen ? '9001' : '',
-      'width' : fullscreen ? document_width+'px' : '',
-      'height' : fullscreen ? document_height+'px' : '',
+      'width' : fullscreen ? fsw + 'px' : '',
+      'height' : fullscreen ? fsh + 'px' : '',
       'opacity' : fullscreenOnce ? resizeCorrection() : ''}"
   >
-    <div id="even" class=" scene {{animEven}} " [ngClass]="getEvenAct()"
-      [ngStyle]="evenScene.getStyle()"
-    >
-      <div id="sceneObject" *ngFor ="let obj of evenScene.objects"
-      class="{{activeEvenEvent(obj.getEvents())}}"
-      [ngClass]="{'link' : obj.action.split(':')[0] === 'click'}"
+    <div id="even" class=" scene {{animEven}}" [ngStyle]="evenScene.getStyle()">
+      <div *ngFor ="let obj of evenScene.objects"
+      [ngClass]="activeEvenEvent(obj)"
       (click)="handleSceneClicks(obj.action)"
       [ngStyle]="obj.getStyle(stageW, stageH)"
       >
         <p *ngIf="obj.type === 'txt'">{{obj.cont}}</p>
       </div>
+      <div id="ep" class="{{getEvenPerm()}}"></div>
     </div>
 
-    <div id="odd" class=" scene {{animOdd}} " [ngClass]="getOddAct()"
-      [ngStyle]="oddScene.getStyle()"
-    >
-      <div id="sceneObject" *ngFor ="let obj of oddScene.objects"
-      class="{{activeOddEvent(obj.getEvents())}}"
-      [ngClass]="{'link' : obj.action.split(':')[0] === 'click'}"
+    <div id="odd" class=" scene {{animOdd}}" [ngStyle]="oddScene.getStyle()">
+      <div *ngFor ="let obj of oddScene.objects"
+      [ngClass]="activeOddEvent(obj)"
       (click)="handleSceneClicks(obj.action)"
       [ngStyle]="obj.getStyle(stageW, stageH)"
       >
         <p *ngIf="obj.type === 'txt'">{{obj.cont}}</p>
       </div>
+      <div id="op" class="{{getOddPerm()}}"></div>
     </div>
   </div>
+</div>
+
+<div id="preload" style="display:none;position:absolute;left:0;top:0;">
+  <img  style="width:50px;height:50px; overflow:none;" class="toPreload"
+    *ngFor ="let preload of preloads" src="{{preload}}">
 </div>

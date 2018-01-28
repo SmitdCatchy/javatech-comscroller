@@ -40,43 +40,18 @@
     height: 641.25px;
   }
 }
-#stage:-moz-full-screen {
+.disabled{
   position: absolute;
-  z-index: 9001;
+  top: 0; bottom: 0;
+  left: 0; right: 0;
+  z-index: 9999;
+}
+.enabled{
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  z-index: 9999;
 }
-
-#stage:-webkit-full-screen {
-  position: absolute;
-  z-index: 9001;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-}
-
-#stage:fullscreen {
-  position: absolute;
-  z-index: 9001;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-}
-// @media (min-height: 1080px) {
-//   #stage{
-//     position: absolute;
-//     z-index: 9001;
-//     top: 0;
-//     left: 0;
-//     width: 100vw;
-//     height: 100vh;
-//   }
-// }
-
 .scene{
   overflow:hidden;
   background-color: #222;
@@ -93,36 +68,23 @@
   cursor: pointer;
 }
 
-//Events
-@for $i from 1 through 10 { /*maximum 10 events in van scene*/
-  @for $j from 1 through 10{
-
-    @if $i == $j {
-      .pas#{$i} .event#{$j} {
-        opacity: 1;
-        visibility: visible;
-      }
-    } @else{
-      .pas#{$i} .event#{$j} {
-        opacity: 0;
-        visibility: hidden;
-      }
-    }
-
-    @if $i == $j {
-      .act#{$i} .event#{$j} {
-        animation: fadeinevent 0.25s;
-        animation-fill-mode: forwards;
-        animation-timing-function:ease-in-out;
-      }
-    } @else{
-      .act#{$i} .event#{$j} {
-        animation: fadeoutevent 0.25s;
-        animation-fill-mode: forwards;
-        animation-timing-function:ease-in-out;
-      }
-    }
-  }
+.active{
+  opacity: 1;
+  visibility: visible;
+}
+.activated{
+  animation: fadeinevent 0.25s;
+  animation-fill-mode: forwards;
+  animation-timing-function:ease-in-out;
+}
+.deactive{
+  opacity: 0;
+  visibility: hidden;
+}
+.deactivated{
+  animation: fadeoutevent 0.25s;
+  animation-fill-mode: forwards;
+  animation-timing-function:ease-in-out;
 }
 
 @keyframes fadeinevent {

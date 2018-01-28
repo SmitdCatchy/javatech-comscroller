@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 
 import { ModuleService } from '../../services/module.service';
 import { SceneService } from '../../services/scene.service';
@@ -23,18 +23,21 @@ export class PlayComponent implements OnInit {
     private sceneService: SceneService,
     public userService: UserService,
     private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
     private router : Router
   ){
   }
 
   ngOnInit() {
 
-    this.resize();
-    this.setStage();
-
     this.moduleId = this.moduleService.selectedModule;
 
     if(this.moduleId !== 0){
+
+      this.resize();
+      this.setStage();
+      this.cdr.detectChanges();
+
       this.moduleService.getModuleById(this.moduleId).subscribe(result => {
 
         let t = result.module;
@@ -82,6 +85,8 @@ export class PlayComponent implements OnInit {
           this.oddAct = 1;
           this.oddPrev = 1;
           this.initial = true;
+
+          this.preloadImages(this.oddScene);
         }
         else{ // EVEN
           this.evenScene = new Scene(scene.id, scene.mId, scene.background, objects);
@@ -89,31 +94,84 @@ export class PlayComponent implements OnInit {
           this.evenAct = 1;
           this.evenPrev = 1;
           this.initial = true;
+
+          this.preloadImages(this.evenScene);
+
         }
 
-        console.log("odd:"+this.switch);
+      });
+    });
+  }
+  preloadImages(current: Scene){
+    this.preloads = [];
+    let scenes = [];
+    for(const id of current.toPreload){
+      let promise = this.sceneService.getSceneById(id);
+      scenes.push(promise);
+    }
+    Observable.forkJoin(scenes).subscribe(res =>{
+      const results = res as any[];
+
+      let objects = [];
+      for(const scene of results){
+        const preScene = new Scene(scene.scene.id, scene.scene.mId, scene.scene.background, [ new SceneObject(
+          0, 0, 'err', 'none',
+          0, 0, 0, 0, 0,
+          '', '', '0'
+        ) ]);
+        const bg = preScene.background;
+        if(bg !== '' && bg.charAt(0) !== '#' && bg.charAt(0) !== 'r'){
+          this.preloads.push(bg);
+        }
+        let promise = this.sceneService.getObjectsBySceneId(scene.scene.id);
+        objects.push(promise);
+      }
+      Observable.forkJoin(objects).subscribe(res2 =>{
+        const results2 = res2 as any[];
+        for(const objects of results2){
+          for(const obj of objects.objects){
+            const pl = new SceneObject(
+              obj.id, obj.sId, obj.type, obj.action,
+              obj.x, obj.y, obj.w, obj.h, obj.z,
+              obj.cont, obj.style, obj.event
+            ).imageToPreload;
+            if(pl !== '' && pl.charAt(0) !== '#' && pl.charAt(0) !== 'r'){
+              this.preloads.push(pl);
+            }
+          }
+        }
 
       });
     });
   }
 
   switch = false;
-  // sceneId: number;
+
   oddScene = new Scene(0,0,"#000",[]);
   oddAct = 1;
   oddPrev = 1;
+  oddPerm= "enabled";
   evenScene = new Scene(0,0,"#000",[]);
   evenAct = 1;
   evenPrev = 1;
+  evenPerm= "enabled";
 
   initial = true;
+
+  preloads:string[] = [];
 
   animOdd = "fade";
   animEven = "fade-out";
 
+  getOddPerm(){
+    return this.oddPerm;
+  }
+  getEvenPerm(){
+    return this.evenPerm;
+  }
+
 
   handleSceneClicks(input: string){
-    this.initial = false;
     const action = input.split(':');
     if( action[0] === "click"){
       if( action[1] === 'scene' ){
@@ -122,16 +180,21 @@ export class PlayComponent implements OnInit {
           else this.animEven = action[3];
           if( this.animOdd === action[4] ) this.animOdd = action[4] +"C";
           else this.animOdd = action[4];
+          this.oddPerm = "disabled";
+          this.evenPerm = "enabled";
         }
         else{
           if( this.animOdd === action[3] ) this.animOdd = action[3] +"C";
           else this.animOdd = action[3];
           if( this.animEven === action[4] ) this.animEven = action[4] +"C";
           else this.animEven = action[4];
+          this.oddPerm = "enabled";
+          this.evenPerm = "disabled";
         }
         this.loadScene(+action[2]);
       }
       if(action[1] === 'event'){
+        this.initial = false;
         if(this.switch){
           if(this.oddAct !== +action[2]){
             this.oddPrev = this.oddAct;
@@ -148,25 +211,14 @@ export class PlayComponent implements OnInit {
     }
   }
 
-  getOddAct():string{
-    if(this.initial) {
-      return "pas" + this.oddAct;
-    }
-    else{
-      return "act" + this.oddAct;
-    }
-  }
-  getEvenAct():string{
-    if(this.initial) {
-      return "pas" + this.evenAct;
-    }
-    else{
-      return "act" + this.evenAct;
-    }
-  }
+  // defCurs(e){
+  //   console.log("def");
+  //   document.body.style.cursor = e.buttons && e.button == 2 ? 'move' : 'default';
+  // }
 
-  activeOddEvent(events: number[]){
-    let init: string = "0";
+  activeOddEvent(obj: SceneObject): string{
+    const events = obj.getEvents();
+    let init: string = "deactive";
     let curr = false;
     let prev = false;
     for(let e of events){
@@ -178,19 +230,27 @@ export class PlayComponent implements OnInit {
       }
     }
     if(curr && prev){
-      init = "stay";
+      init = "active";
     }
-    else if(curr){
-      init = "" + this.oddAct;
+    else if(curr && !prev){
+      init = "activated";
+    }
+    else if(!curr && prev){
+      init = "deactivated";
     }
     else{
-      if(this.oddAct < 5) init = "" + (this.oddAct + 1);
-      else                    init = "" + (this.oddAct - 1);
+      init = "deactive";
     }
-    return "event"+init;
+
+    if(obj.action.split(":")[0] === "click"){
+      init+= " link";
+    }
+
+    return init;
   }
-  activeEvenEvent(events: number[]){
-    let init: string = "0";
+  activeEvenEvent(obj: SceneObject):string{
+    const events = obj.getEvents();
+    let init: string = "deactive";
     let curr = false;
     let prev = false;
     for(let e of events){
@@ -202,16 +262,23 @@ export class PlayComponent implements OnInit {
       }
     }
     if(curr && prev){
-      init = "stay";
+      init = "active";
     }
-    else if(curr){
-      init = "" + this.evenAct;
+    else if(curr && !prev){
+      init = "activated";
+    }
+    else if(!curr && prev){
+      init = "deactivated";
     }
     else{
-      if(this.evenAct < 5) init = "" + (this.evenAct + 1);
-      else                    init = "" + (this.evenAct - 1);
+      init = "deactive";
     }
-    return "event"+init;
+
+    if(obj.action.split(":")[0] === "click"){
+      init+= " link";
+    }
+
+    return init;
   }
 
   LOG(log:any){
@@ -221,12 +288,21 @@ export class PlayComponent implements OnInit {
   container_min_height = 0;
   document_height = document.documentElement.clientHeight;
   document_width = document.documentElement.clientHeight;
+  fsh = 0;
+  fsw = 0;
   resize(){
     this.document_height = document.documentElement.clientHeight;
     this.document_width = document.documentElement.clientWidth;
 
+    if(this.document_height < this.document_width/16*9){
+      this.fsh = this.document_height;
+      this.fsw = this.document_height/9*16;
+    }else{
+      this.fsw = this.document_width;
+      this.fsh = this.document_width/16*9;
+    }
+
     if(screen.height === window.innerHeight){
-      console.log("fullscreen");
       this.fullscreen = true;
       this.fullscreenOnce = true;
     }
@@ -247,8 +323,6 @@ export class PlayComponent implements OnInit {
   fullscreenOnce = false;
 
   resizeCorrection():number{
-    console.log(0);
-
     this.fullscreenOnce = false;
     setTimeout(()=>{
       this.setStage();
@@ -265,6 +339,7 @@ export class PlayComponent implements OnInit {
   @HostListener('window:resize', ['$event']) onResize(event){
     this.resize();
     this.setStage();
+    this.cdr.detectChanges();
   }
 
 }

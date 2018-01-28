@@ -99,6 +99,18 @@
           <div [ngClass]="{'highlight': isOver(node.id), 'selected' : isSelected(node.id)}" class="node-body isolated-node"
             (click)="select(node.id, node.mask)" (mouseenter)="hovered(node.id)">{{node.mask}}</div>
         </div>
+
+        <div class="bouncer"
+        [ngStyle]="{
+          'opacity': addingNode ? '1' : '0',
+          'width': addingNode ? '' : '0',
+          'margin': addingNode ? '' : '0'
+        }"
+        >
+          <div class="double-bounce1"></div>
+          <div class="double-bounce2"></div>
+        </div>
+
       </div>
       <h3>GRAPH</h3>
       <div id="check" class="graph">
@@ -182,7 +194,6 @@
           </div>
         </div>
         <div class="mask" *ngFor="let curr of currentObjects" (mousedown)="onMouseButton($event,'drag',curr.obj.id)" (touchstart)="onMouseButton($event,'drag',curr.obj.id)"
-          (click)="LOG(curr.obj.action.split(':'))"
           [style.left.px] = "stageX(curr.obj.x) + stageX(curr.obj.w)/2 - 15"
           [style.top.px] = "stageY(curr.obj.y) + stageY(curr.obj.h)/2 - 15"
           [style.zIndex] = "curr.obj.z + 2000"
@@ -259,6 +270,40 @@
         <button disabled >{{currentAct}}</button>
         <button (click)="nextAct()" >&#xf0a9;</button>
         <!-- <button (click)="submitScene()" >&#xf0ee;</button> -->
+      </div>
+    </div>
+
+    <!-- FOLDER -->
+    <div class="separator {{folder_active}}"></div>
+    <div id="folder" class="{{folder_active}}">
+      <h2>YOUR FOLDER</h2>
+      <div class="folder">
+        <div class="file" *ngFor=" let file of folder" title="{{file}}" (click)="selectName(file)"
+          [ngClass]="{'chosen': isSelectedFile(file)}"
+        >
+          {{(file.split('.')[1] === 'mp3')?'&#xf1c7;':(file.split('.')[1] === 'gif')?'&#xf1c8;':'&#xf1c5;'}}
+          <p>{{file.split('.')[0].slice(0,5)}}</p>
+        </div>
+      </div>
+      <button type="button" name="deletefile" (click)="deleteFile()" [disabled]="fileNames.length <= 0">Delete</button>
+
+      <form class="file-input">
+        <input id="file" type="file" name="file" multiple="multiple"
+          (change)="handleFileInput($event.target.files)" [disabled]="uploading">
+        <label class="selecter" for="file" >Select Files</label>
+        <button class="button" type="button" (click)="uploadFiles()" [disabled]="selectedFiles">Upload</button>
+      </form>
+
+      <div class="spinner"
+        [ngStyle]="{
+          'opacity': uploading ? '1' : '0'
+        }"
+      >
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
       </div>
     </div>
 

@@ -17,11 +17,14 @@ export class Routes {
   static OBJECT_GET_SID: String = 'object/all/';
   static OBJECT_UPDATE: String = 'object/update';
   static OBJECT_DELETE: String = 'object/delete/';
+  static FILE_LIST: String = 'file/list/';
+  static FILE_UPLOAD: String = 'file/upload';
+  static FILE_DELETE: String = 'file/delete/';
 }
 
 export class Server {
-  private static address: String = '';
-  private static port: String = '';
+  private static address: String = 'localhost';
+  private static port: String = '8080';
   private static prefix: String = 'api';
 
   static routeTo(route: String) {

@@ -5,6 +5,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';import{RouterModule, Routes } from '@angular/router';
 import { AppRoutingModule } from './app.routing';
 
+import { UserService } from './services/user.service';
+import { SceneService } from './services/scene.service';
+import { ModuleService } from './services/module.service';
+import { EditorService } from './services/editor.service';
 
 import { AppComponent } from './app.component';
 import { IndexComponent } from './pages/index/index.component';
@@ -18,11 +22,6 @@ import { RegisterComponent } from './pages/register/register.component';
 import { DropdownmenuComponent } from './components/header/dropdownmenu/dropdownmenu.component';
 import { NavigationComponent } from './components/header/navigation/navigation.component';
 import { EditorComponent } from './pages/editor/editor.component';
-
-import { UserService } from './services/user.service';
-import { SceneService } from './services/scene.service';
-import { ModuleService } from './services/module.service';
-import { CarrierService } from './services/carrier.service';
 import { PlayComponent } from './pages/play/play.component';
 
 
@@ -53,7 +52,7 @@ import { PlayComponent } from './pages/play/play.component';
     UserService,
     SceneService,
     ModuleService,
-    CarrierService,
+    EditorService
   ],
   bootstrap: [AppComponent]
 })
